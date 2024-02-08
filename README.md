@@ -63,4 +63,4 @@
 1. **npm install -g typescript**                     Donwload TypeScript Complier globally
 2. **npm install --save-dev typescript**             Donwload TypeScript Complier development mode
 3. **tsc typescript.ts javascript.js**               Compile (Converts) TypeScript file into JavaScript file
-4. **tsc typescript.ts -w*                          Wacth TypeScript and whenever it changes automatically compile 
+4. **tsc typescript.ts -w**                          Wacth TypeScript and whenever it changes automatically compile 
