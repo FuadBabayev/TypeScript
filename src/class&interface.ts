@@ -1,150 +1,228 @@
-// ! Classess, Acces Modifier Private&Public
-// ! Private means Employees property in 7th line only accessible from inside the class: department1.addEmployees('A') NOT outside: department1.employees[2] = 'A'
-// ! Public means accessible from outside and inside. All properties are public in default and you dont need to write
-// ! Readonly force to NOT change properties values
-// ! Protected is like Private, In protected properties are available in all class (base, inheritance) but unlike private is available only base class not inheritance
-// ! Static Class-in properties kimi davranir onu yaratmaq ucun new acar sozunden istifade olunmur bir basa olaraq className.staticProperty yazaraq el catan olur
-// * Singleton class is configured, you don't create it with "new" but by calling a method which then ensures that only one instance of the class exists at any time
+// ! Classes
+// ! Classes are blueprints (planlar) for objects. And classes make it much more easier to create multiple, similar objects. Property is basically a variable in class
+// ! Acces Modifiers Private Public Protected
+// Todo: Readonly: property is NOT accessible to change from outside or inside of the class. You cant change value of this type of properties just like CONST variable
+// Todo: Private: property only accessible to change from inside of the class. For ex: const person1 = new Person('...') INSIDE, person1.employee[1] = '...' OUTSIDE
+// Todo: Public: property accessible to change from outside and inside of the class. All properties are public in default and you dont need to write
+// Todo: Protected == Private: means property is available in all BASE, INHERITANCE classess, Unlike private is available only BASE class
+// Todo: Static: is a method you call directly on a class, not on an object created based on it
+// Todo: Static Class-in properties kimi davranir onu yaratmaq ucun new acar sozunden istifade olunmur bir basa olaraq className.staticProperty yazaraq el catan olur
 class Department {
-    readonly university: string;                                                     // ! after constructor this.university
-    public faculty: string;
+    // readonly id: number;             // ! No need to write because already written in consturctor(readonly id: number)
+    name: string;
+    public place: string;
     private employees: string[] = [];
-    protected worker: string[] = [];
-    static weekday: string = 'Friday';                  // Todo: Static method is a method that you call directly on a class, not on an object created based on it.
+    // private workers: string[] = [];    // ! PRIVATE and only accessible within class 'Department' not inherit class like AccountingDepartment
+    protected workers: string[] = [];     // ! PROTECTED and accessible within class 'Department' and inherit class like AccountingDepartment
+    static weekday: string = 'Friday';    // Todo: Static method is a method that you call directly on a class, not on an object created based on it.
 
-    constructor(academy: string, branch: string) {
-        this.university = academy;
-        this.faculty = branch;
+    constructor(readonly id: number /* n: number */, n1: string, n2: string) {   // * constructor(n: number) {} property yuxaridada yazila biler burada da
+        // this.id = n;                 // ! No need to write because already written in consturctor(readonly id: number)
+        this.name = n1;
+        this.place = n2;
     }
-
     static createEmployee(firstname: string) {                               // Todo: Static bildirirki bu her yerden el catandir class-in propertiesi kimi
         return { name: firstname }
     }
-
-    describe() {
-        console.log('University: ' + this.university);
+    describe(/* this: Department */) {                       // Todo: It is by default this: Department however it is not MUST be there
+        console.log('Department: ' + this.name);             // Todo: If we write just name the function will search for parametr inside itself and global variable 
+        // console.log(this.weekday);                        // ! Static and we cant acces like that
+        console.log(Department.weekday);                     // ! Static and we acces like that
+        // this.id = 666;                                    // ! Cannot assign to 'id' because it is a read-only property.
     }
-
-    addEmployees(employee: string) {
-        // this.university = 'ADNSU;                                        // ! Cannot assign to 'university' because it is a READONLY property.
+    addEmployee(employee: string) {
         this.employees.push(employee);
     }
-
     printEmployeeInformation() {
-        console.log(this.employees.length);
-        console.log(this.employees);
+        console.log(this.employees, this.place);
     }
 }
+const accounting = new Department(777, 'Accounting', 'Baku');       // ! This one goes to constructor because based on Department Class
 
-class ITDepartment extends Department {                                      // Department-den miras alir yeni butun properties (constructors) bura kocur
-    admins: string[];                                                        // Instead we write it into constructor (it is same)
+console.log(accounting);                                            // Department {name: 'Accounting'} 
+accounting.describe();                                              // Department: Accounting
+const accountingCopy = { describe: accounting.describe }            // { describe: ƒ describe() { console.log('Department: ' + this.name)} } 
+// ! Describe property has been added to the object which created with object literals {}, NOT based on Department Class that why this keyword is unrecognizable
+console.log(accountingCopy.describe === accounting.describe);       // true
+console.log(accountingCopy.describe);                               // ƒ describe() { console.log('Department: ' + this.name)}
+accountingCopy.describe();                                          // ! Department: undefined => because this keyword is unrecognizable outside the class
 
-    constructor(academy: string, admins: string[]) {
-        super(academy, 'Backend');                                           // ! Super calls the constructor (properties) of base Department Class
-        this.admins = admins
+accounting.addEmployee('Max');
+accounting.addEmployee('Mine');
+accounting.printEmployeeInformation();                              // (2) ['Max', 'Mine']  'Baku'
+// accounting.employees[1] = 'Alex';                                // ! TRUE when employee property is PUBLIC; FALSE when employee property is PRIVATE
+accounting.place = 'Akhmadli';                                      // ! TRUE when place property is PUBLIC; FALSE when employee property is PRIVATE
+accounting.printEmployeeInformation();                              // (2) ['Max', 'Alex']  'Akhmadli'
+
+
+
+
+// ! Inheritance
+// ! Inheritance allows you to share some common functionality and yet create more specialized blueprints
+// Todo: Inheritance class extends Base Class which means that all of the properties of Base Class are extend to class inherit from Base
+// ! Super: calls the constructor of base class
+// Todo: Hint: You can only inherit from ONE CLASS, can not inherit from MULTIPLE Classes
+// ! There is not multiInheritance but multiImplement exist
+class ITDepartment extends Department {
+    admins: string[];
+    constructor(id: number, admins: string[]) {
+        super(id, 'Computer Science', 'ASOIU');
+        this.admins = admins;
     }
 }
+const it = new ITDepartment(3, ['Happy']); console.log(it); // ITDepartment {id: 3, employees: [], name: 'Computer Science', place: 'ASOIU', admins: ['Happy']}
+it.addEmployee('Ali');
+it.addEmployee('Rza');
+it.describe();                                              // Department: Computer Science
+it.name = 'NEW SCIENCE';
+it.printEmployeeInformation();                              // (2) ['Ali', 'Rza'] 'ASOIU'
+console.log(it);                                            // ITDepartment {id: 3, employees: ['Ali', 'Rza'], name: 'NEW SCIENCE', place: 'ASOIU', admins: ['Happy']}
 
-class HelpDesk extends Department {
-    constructor(academy: string, private reports: string[]) {
-        super(academy, 'Kadrlar Sobesi');
-    }
+class AccountingDepartment extends Department {
+    private lastReport: string;                             // ! PRIVATE and cant accessible from OUTSIDE the class but we access from OUTSIDE by GETTER (ENCAPSULATE)
 
-    addWorkers(name: string) {
-        if (name === 'Elsen') {
-            return;
+    get mostRecentReport() {
+        if (this.lastReport) {
+            return this.lastReport;                         // ! Now it is accessible like PUBLIC with the helping of GETTER
         }
-        this.worker.push(name);
+        throw new Error('No report found')
     }
 
+    set mostRecentReport(value: string) {
+        if (!value) throw new Error('Please pass in avalid value!');
+        this.addReports(value);
+    }
+
+    constructor(id: number, private reports: string[]) {
+        super(id, 'Accounting', 'Department');
+        this.lastReport = reports[0];                        // ! Private but we can acces because INSIDE class
+    }
+    addEmployee(lads: string) {                              // ! We can overwrite method even if it exist in base class and it consider as AccountingDepartment class
+        if (lads === 'Turgut') return;                       // Turgut olsa elave etmek o siyahiya
+        this.workers.push(lads);
+    }
     addReports(text: string) {
-        this.reports.push(text)
+        this.reports.push(text);
+        this.lastReport = text;
     }
-
     printReports() {
         console.log(this.reports);
     }
 }
+const acc = new AccountingDepartment(23, []);
+console.log(acc);                               // AccountingDepartment {id: 23, employees: [], name: 'Accounting', place: 'Department', reports: []}
+// console.log(acc.mostRecentReport);           // ! Uncaught Error: No report found => Beacuse No any pushed reports, it is empty []
+acc.addReports('Hello');
+acc.printReports();                             // (1) ['Hello']
+acc.addEmployee('Elsen');
+acc.addEmployee('Turgut');
+acc.addEmployee('Ali');
+console.log(acc);               // AccountingDepartment {id: 23, employees: [], workers: ['Elsen', 'Ali'], name: 'Accounting', place: 'Department', reports['Hello']}
+// console.log(acc.lastReport);         // Hello (if it is PUBLIC)         // ! If it is PRIVATE we cant get like that
+console.log(acc.mostRecentReport);      // Hello (even if it is PRIVATE)   // ! Beacuse of GETTER
 
-const department1 = new Department('ASOIU', 'Geophysical Engineering');     // ! This one goes to constructor because based on Department Class
-console.log(department1);                                                   // Department {university: 'ASOIU', faculty: 'Geophysical Engineering'}
-// const departmentIT1 = new ITDepartment('ASOIU', 'Computer Science');     // ! Inheritance olduqu ucun class ITDepartment ici bos olsada Department-i qebul edir
-// console.log(departmentIT1);                                              // ITDepartment {university: 'ASOIU', faculty: 'Computer Science'}
-department1.describe()                                                      // University: ASOIU
+// acc.mostRecentReport = '';                      // ! SETTER        Uncaught Error: Please pass in avalid value!
+acc.mostRecentReport = 'Salam';                    // Isliyecek cunki falsy value deyil
+console.log(acc);                                  // AccountingDepartment {id: 23, lastReport: "Salam" ... place: 'Department', reports['Hello']}
 
-const department2 = { academy: department1.describe };                      // ! This one is NOT based on Department Class that's why yield to undefined
-department2.academy();                                                      // University: undefined 
-
-department1.addEmployees('Fuad');
-department1.addEmployees('Rauf');
-department1.printEmployeeInformation();                                     // 2 and (2) ['Fuad', 'Rauf']
-department1.faculty = "GKF";                                                // ! facult in Department class is PUBLIC that's why we can manipulate it 
-console.log(department1);                                                   // Department {university: 'ASOIU', faculty: 'GKF'}
-// department1.employees[2] = 'Mecid';                                      // ! It works if it is not PRIVATE in front of employees property
-// department1.printEmployeeInformation();                                  // 3 and (3) ['Fuad', 'Rauf', 'Mecid']
-
-const departmentIT1 = new ITDepartment('ASOIU', ['Ali', 'Max', 'Rza']);     // ! ITDepartment class icinde deyisiklik oldu array artirildi
-console.log(departmentIT1);          // ITDepartment {employees: Array(0), university: 'ASOIU', faculty: 'Backend', admins: (3) ['Ali', 'Max', 'Rza']}
-
-const helpdesk1 = new HelpDesk('3rd Floor', []);
-console.log(helpdesk1);              // HelpDesk {employees: Array(0), university: '3rd Floor', faculty: 'Kadrlar Sobesi', reports: []}
-helpdesk1.addReports('All Reposts have been checked');
-console.log(helpdesk1);              // HelpDesk {employees: Array(0), university: '3rd Floor', faculty: 'Kadrlar Sobesi', reports: [All Reposts have been checked]}
-helpdesk1.printReports();            // ['All Reposts have been checked']
-helpdesk1.addWorkers('Elsen');       // ! It does NOT go to worker
-console.log(helpdesk1);              // HelpDesk {employees: Array(0), worker: [], university: '3rd Floor', faculty: 'Kadrlar Sobesi', reports: Array(1)}
-helpdesk1.addWorkers('Eli');         // ! It go to worker
-console.log(helpdesk1);              // HelpDesk {employees: Array(0), worker: ['Eli'], university: '3rd Floor', faculty: 'Kadrlar Sobesi', reports: Array(1)}
-
-const newEmployee = Department.createEmployee('Turgut');        // ! createEmployee STATIC olduqu ucun new sozunden istifade etmeden birbasa Department elcatandir
-console.log(newEmployee, Department.weekday);                   // {name: 'Turgut'} 'Friday'
+const employee1 = Department.createEmployee('Akif');        // ! createEmployee STATIC olduqu ucun new sozunden istifade etmeden birbasa Department elcatandir
+console.log(employee1, Department.weekday);                 // {name: 'Akif'} 'Friday'
 
 
 
 
 // ! Interface: describe structure of objects or function types and force classes to have certain features. But can't store arbitrary types like union types
-// ! Implements: Checks that the class can be treated as the interface type
+// ! Implements: Checks that the class can be treated as the interface type (qisaca interfacede hansi qaydalar verilibse ona uygun doldurmaq lazimdir)
 // Todo: For interfaces you can inherit from multiple interfaces, but for classes you can inherit only one class
-// Todo: Interface only accepts Readonly property not other ones (public, private, protected)
-interface Person {
-    firstname: string;
-    lastName?: string;                   // ! Optional parameter (?) interfaceden toreyen interfacede diger propertiler kimi olmasi mecbur olmuyan parametr demekdir
-    greet(text: string): void;
-}
-
-let person1: Person;
-person1 = {
-    firstname: 'Fuad',
-    greet(text) {
-        console.log(text + ' ' + this.firstname);
+// Todo: Interface only accepts Readonly property not other ones (public, private, protected)      
+// ! Interfaces just look like Types and we can write Types instead of Interface. But Interfaces cant store Union Types, Types store other things like Union types
+interface Human {                                                                                     // *        type Human2 = {
+    name: string;                                                                                     // *            name: string;     
+    age: number;                                                                                      // *            age: number
+    greet(phrase: string): void;                                                                      // *            greet(phrase: string): void;
+}                                                                                                     // *        } 
+let user1: Human;
+user1 = {
+    name: 'Fuad',
+    age: 25,
+    greet(phrase) {
+        console.log(phrase + ' ' + this.name);
     }
 }
-console.log(person1);                   // {firstname: 'Fuad', greet: ƒ}
-person1.greet('Hello');                 // Hello Fuad 
+console.log(user1);                                     // {name: 'Fuad', age: 25, greet: ƒ}
+user1.greet('Hello Mr.')                                // Hello Mr. Fuad
 
-class Caucasian implements Person {           // Type 'Caucasian' is missing the following properties from type 'Person': firstname, age, greet
-    firstname: string;
-    age = 25;
-
-    constructor(ad: string) {
-        this.firstname = ad;
+// ! Extending interfaces
+// ! Optional Parameter/Property (?): means this property might exits in classes that implement this interface but it does not have to.
+interface Name {
+    name: string;
+    // nickname: string       // ! If we declare 'nickname' in here, this will give us ERROR because it is important to be in Hooman class
+    nickname?: string         // ! If use Optional Parameter(?): like nickname?: means it is NOT very important to be in Hooman class (totally up to our preference)
+}
+interface Surname {
+    readonly surname?: string;                           // ! Interface only accepts Readonly property not other ones (public, private, protected)
+}
+interface Greetable extends Name, Surname {              // ! You can inherit(extend) multi interfaces but cant inherit multiclasses
+    greet(phrase: string): void;
+}
+class Hooman implements Name, Greetable {       // ! You can implement more than one Interface using comma (That is main difference between inheritance)
+    name: string;
+    readonly surname?: string
+    age: number = 17;
+    constructor(fname: string, sname: string = 'Babaeff') {
+        this.name = fname;
+        if (sname) {
+            this.surname = sname;
+        }
     }
-
-    greet(text: string) {
-        console.log(text + ' ' + this.firstname);
+    greet(phrase: string) {
+        console.log(phrase + ' ' + this.name + ' ' + this.surname + ' and ' + this.age + ' years old');
     }
 }
+let hooman1: Hooman;                                     // ! Dont matter you can even write let hooman1: Greetable;  even if let hooman1: Hooman | Greetable;
+const withoutSname = new Hooman('Raffet'); console.log(withoutSname);     // Hooman {age: 17, name: 'Raffet', surname: 'Babaeff'}
+hooman1 = new Hooman('Rufet', 'Babayev'); console.log(hooman1);           // Hooman {age: 17, name: 'Rufet', surname: 'Babayev'}
+hooman1.greet('Hi there I\'m');                                           // Hi there I'm Rufet Babayev and 17 years old
+hooman1.name = 'Murad'; console.log(hooman1);                             // Hooman {age: 17, name: 'Murad', surname: 'Babayev'}
+// hooman1.surname = 'Baba';                                              // ! Cannot assign to 'surname' because it is a read-only property.
 
-
-// ! Function Types
+// ! Interfaces as Function Types
 type AddFn = (param1: number, param2: number) => number;
 let addition: AddFn;
-addition = (num1: number, num2: number) =>num1 + num2;
-console.log(addition(5, 7));
+addition = (num1: number, num2: number) => num1 + num2;
+console.log(addition(5, 7));            // 12
 
-interface AddFn2 {
-    (param1: number, param2: number): number;
+interface AddFn2 { (param1: number, param2: number): number }       // ! In here it looks like anonimous functions but types script understand it
+let plus: AddFn2;                                                   // ! Beacuse of here it understan belong to aninimous function
+plus = (num1: number, num2: number) => num1 + num2;                 // ! If we change data type of num1 it will give us an ERROR
+console.log(plus(6, 7));                // 13
+
+
+
+
+// ! With simple example Inheritance
+class Person {
+    fname: string;
+    sname: string;
+    age: number;
+    isEmployee: boolean;
+    constructor(ad: string, soyad: string, yas: number, issizlik: boolean) {
+        this.fname = ad;
+        this.sname = soyad;
+        this.age = yas;
+        this.isEmployee = issizlik;
+    }
 }
-let plus: AddFn2;
-plus = (num1: number, num2: number) => num1 + num2;
-console.log(plus(6, 7));
+const person1 = new Person('Fuad', 'Babayev', 25, true);        // Person {fname: 'Fuad', sname: 'Babayev', age: 25, isEmployee: true}
+
+class WorkerA extends Person { }                                // ! Although WorkerA class is empty, it has all properties inherit from base Person class
+const worker1 = new WorkerA('Rauf', 'Abbasli', 25, false);      // WorkerA {fname: 'Rauf', sname: 'Abbasli', age: 25, isEmployee: false}
+
+class WorkerB extends Person {
+    haveCar: boolean;
+    constructor(answer: boolean) {
+        super('Ayhan', 'Narimanov', 24, true);                 // ! Onsuzda Person-un constructorunu alir sadece burada onlarin ici doldurulmalidir
+        this.haveCar = answer;                                 // ! Burada ise elave olaraq WorkerB classin oz constructoru elave edilir
+    }
+}
+const worker2 = new WorkerB(true);                              // WorkerB {fname: 'Ayhan', sname: 'Narimanov', age: 24, isEmployee: true, haveCar: true}
